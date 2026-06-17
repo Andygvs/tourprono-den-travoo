@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>TourProno Den Travoo</title>
+
+<style>
+body { font-family: Arial; padding:20px; background:#fff; }
+h1 { color:#f5b301; }
+
+.card {
+  border:1px solid #ddd;
+  padding:10px;
+  margin:10px 0;
+  border-radius:8px;
+}
+
+input, select, button {
+  padding:6px;
+  margin:5px 0;
+}
+
+button.delete {
+  background:red;
+  color:white;
+  border:none;
+  cursor:pointer;
+  margin-top:5px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>🚴 TourProno Den Travoo</h1>
+
+<!-- 🟡 REGLEMENT -->
+<h2>📜 Reglement</h2>
+<div class="card">
+<ul>
+  <li>Elke deelnemer kiest <b>één renner</b> voor de volledige Tour.</li>
+  <li>Elke renner kan maar <b>één keer gekozen worden</b>.</li>
+  <li>Punten worden toegekend per rit:</li>
+  <ul>
+    <li>1e plaats = 25 punten</li>
+    <li>2e plaats = 20 punten</li>
+    <li>3e plaats = 16 punten</li>
+    <li>4e plaats = 13 punten</li>
+    <li>5e plaats = 11 punten</li>
+    <li>6e plaats = 10 punten</li>
+    <li>7e plaats = 9 punten</li>
+    <li>8e plaats = 8 punten</li>
+    <li>9e plaats = 7 punten</li>
+    <li>10e plaats = 6 punten</li>
+  </ul>
+  <li>Punten worden opgeteld over alle ritten.</li>
+  <li>Deelnemers kunnen enkel door de organisator worden beheerd.</li>
+</ul>
+</div>
+
+<h2>➕ Deelnemer toevoegen</h2>
+<input id="name" placeholder="Naam">
+<button onclick="addParticipant()">Toevoegen</button>
+
+<h2>👥 Deelnemers beheren</h2>
+<div id="participants"></div>
+
+<h2>🚴 Renner kiezen</h2>
+
+<select id="participantSelect"></select>
+<select id="riderSelect"></select>
+<button onclick="assignRider()">Toewijzen</button>
+
+<h2>🏆 Klassement</h2>
+<div id="ranking"></div>
+
+<h2>🚴 Rit uitslag (top 10)</h2>
+<div id="stageInputs"></div>
+<button onclick="calculatePoints()">Bereken punten</button>
+
+<script>
+
+const pointsTable = [25,20,16,13,11,10,9,8,7,6];
+
+// 🚴 TOUR RENNERS
+let availableRiders = [
+  "Tadej Pogacar","Jonas Vingegaard","Remco Evenepoel","Wout van Aert",
+  "Jasper Philipsen","Mads Pedersen","Mathieu van der Poel","Primoz Roglic",
+  "Egan Bernal","Richard Carapaz","Joao Almeida","Sepp Kuss",
+  "Carlos Rodriguez","Adam Yates","Simon Yates","Julian Alaphilippe",
+  "Biniam Girmay","Kaden Groves","Arnaud De Lie","Michael Matthews",
+  "Dylan Groenewegen","Caleb Ewan","Jonathan Milan","Tim Merlier",
+  "Christophe Laporte","Stefan Küng","Victor Campenaerts","Matej Mohoric",
+  "Magnus Cort","Ben O'Connor","David Gaudu","Thibaut Pinot"
+];
+
+// DATA
+let participants = JSON.parse(localStorage.getItem("participants")) || [];
+
+function save(){
+  localStorage.setItem("participants", JSON.stringify(participants));
+}
+
+// ➕ ADD
+function addParticipant(){
+  let name = document.getElementById("name").value;
+  if(!name) return;
+
+  participants.push({
+    name,
+    rider: "",
+    points: 0
+  });
+
+  document.getElementById("name").value = "";
+  save();
+  render();
+}
+
+// 🗑️ DELETE
+function deleteParticipant(index){
+  let p = participants[index];
+
+  if(p.rider){
+    availableRiders.push(p.rider);
+  }
+
+  participants.splice(index,1);
+  save();
+  render();
+}
+
+// 🚴 ASSIGN RIDER
+function assignRider(){
+
+  let pIndex = document.getElementById("participantSelect").value;
+  let rider = document.getElementById("riderSelect").value;
+
+  if(!participants[pIndex]) return;
+
+  participants[pIndex].rider = rider;
+  availableRiders = availableRiders.filter(r => r !== rider);
+
+  save();
+  render();
+}
+
+// ⭐ POINTS
+function calculatePoints(){
+
+  for(let i=0;i<10;i++){
+    let rider = document.getElementById("r"+i).value;
+
+    participants.forEach(p=>{
+      if(p.rider === rider){
+        p.points += pointsTable[i];
+      }
+    });
+  }
+
+  save();
+  render();
+}
+
+// 🚴 STAGE INPUTS
+function loadStageInputs(){
+  let html = "";
+  for(let i=0;i<10;i++){
+    html += `<input placeholder="${i+1}. renner" id="r${i}"><br>`;
+  }
+  document.getElementById("stageInputs").innerHTML = html;
+}
+
+// 📊 RENDER
+function render(){
+
+  let html = "";
+
+  participants.forEach((p,i)=>{
+    html += `<div class="card">
+      <b>${p.name}</b><br>
+      🚴 ${p.rider || "geen renner"}<br>
+      ⭐ ${p.points} pt<br>
+      <button class="delete" onclick="deleteParticipant(${i})">🗑️ Verwijder</button>
+    </div>`;
+  });
+
+  document.getElementById("participants").innerHTML = html;
+
+  let p = document.getElementById("participantSelect");
+  p.innerHTML = "";
+  participants.forEach((x,i)=>{
+    if(!x.rider){
+      let opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = x.name;
+      p.appendChild(opt);
+    }
+  });
+
+  let r = document.getElementById("riderSelect");
+  r.innerHTML = "";
+  availableRiders.forEach(rider=>{
+    let opt = document.createElement("option");
+    opt.value = rider;
+    opt.textContent = rider;
+    r.appendChild(opt);
+  });
+
+  let sorted = [...participants].sort((a,b)=>b.points-a.points);
+
+  let rank = "";
+  sorted.forEach((p,i)=>{
+    rank += `<div class="card">#${i+1} ${p.name} - ${p.points} pt</div>`;
+  });
+
+  document.getElementById("ranking").innerHTML = rank;
+}
+
+// INIT
+loadStageInputs();
+render();
+
+</script>
+
+</body>
+</html>
