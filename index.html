@@ -57,7 +57,7 @@ button.delete {
   <li>Deelnemers kunnen enkel door de organisator worden beheerd.</li>
 </ul>
 </div>
-
+<button onclick="login()">🔐 Admin login</button>
 <h2>➕ Deelnemer toevoegen</h2>
 <input id="name" placeholder="Naam">
 <button onclick="addParticipant()">Toevoegen</button>
@@ -79,7 +79,19 @@ button.delete {
 <button onclick="calculatePoints()">Bereken punten</button>
 
 <script>
+let isAdmin = false;
 
+function login(){
+  const pw = prompt("Admin wachtwoord:");
+
+  if(pw === "travoo123"){
+    isAdmin = true;
+    alert("Welkom admin 🚴");
+    render();
+  } else {
+    alert("Fout wachtwoord");
+  }
+}
 const pointsTable = [25,20,16,13,11,10,9,8,7,6];
 
 // 🚴 TOUR RENNERS
@@ -181,7 +193,7 @@ function render(){
       <b>${p.name}</b><br>
       🚴 ${p.rider || "geen renner"}<br>
       ⭐ ${p.points} pt<br>
-      <button class="delete" onclick="deleteParticipant(${i})">🗑️ Verwijder</button>
+      ${isAdmin ? `<button class="delete" onclick="deleteParticipant(${i})">🗑️ Verwijder</button>` : ""}
     </div>`;
   });
 
