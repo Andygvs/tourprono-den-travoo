@@ -72,7 +72,8 @@ button.delete {
 <input id="searchRider" placeholder="🔍 Zoek renner..." oninput="filterRiders()">
 <select id="riderSelect" size="6"></select>
 <button onclick="assignRider()">Toewijzen</button>
-
+<button onclick="openStageModal()">📥 Uitslag invoeren</button>
+<button onclick="resetStage()">🔄 Nieuwe rit</button>
 <h2>🏆 Klassement</h2>
 <div id="ranking"></div>
 
@@ -239,4 +240,18 @@ render();
 <script src="riders.js"></script>
 <script src="app.js"></script>
 </body>
+  <div id="stageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+background:rgba(0,0,0,0.7); padding:20px;">
+
+  <div style="background:white; padding:20px; max-width:400px; margin:auto; border-radius:10px;">
+
+    <h3>🚴 Top 10 invoeren</h3>
+
+    <div id="stageInputsModal"></div>
+
+    <button onclick="calculatePoints()">✅ Opslaan & bereken</button>
+    <button onclick="closeStageModal()">❌ Sluiten</button>
+
+  </div>
+</div>
 </html>
