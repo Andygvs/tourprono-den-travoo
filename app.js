@@ -153,3 +153,18 @@ function render(){
 // 🚀 INIT
 loadStageInputs();
 render();
+function filterRiders(){
+  let input = document.getElementById("searchRider").value.toLowerCase();
+
+  let r = document.getElementById("riderSelect");
+  r.innerHTML = "";
+
+  availableRiders
+    .filter(name => name.toLowerCase().includes(input))
+    .forEach(rider=>{
+      let opt = document.createElement("option");
+      opt.value = rider;
+      opt.textContent = rider;
+      r.appendChild(opt);
+    });
+}
