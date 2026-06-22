@@ -168,3 +168,17 @@ function filterRiders(){
       r.appendChild(opt);
     });
 }
+function openStageModal(){
+  let html = "";
+
+  for(let i=0;i<10;i++){
+    html += `<input placeholder="${i+1}. renner" id="m${i}"><br>`;
+  }
+
+  document.getElementById("stageInputsModal").innerHTML = html;
+  document.getElementById("stageModal").style.display = "block";
+}
+
+function closeStageModal(){
+  document.getElementById("stageModal").style.display = "none";
+}
