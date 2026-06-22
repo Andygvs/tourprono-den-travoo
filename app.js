@@ -1,3 +1,4 @@
+let history = JSON.parse(localStorage.getItem("history")) || [];
 let participants = JSON.parse(localStorage.getItem("participants")) || [];
 let availableRiders = [...riders];
 let isAdmin = false;
@@ -7,6 +8,7 @@ const pointsTable = [25,20,16,14,12,10,8,6,4,2];
 // 💾 OPSLAAN
 function save(){
   localStorage.setItem("participants", JSON.stringify(participants));
+  localStorage.setItem("history", JSON.stringify(history));
 }
 
 // 🔐 LOGIN
@@ -78,7 +80,12 @@ function calculatePoints(){
       }
     });
   }
+history.push({
+  stage: history.length + 1,
+  data: document.getElementById("stageModal") ? "rit ingevoerd" : "rit"
+});
 
+localStorage.setItem("history", JSON.stringify(history));
   save();
   render();
   closeStageModal();
@@ -151,6 +158,13 @@ function render(){
   });
 
   document.getElementById("ranking").innerHTML = rank;
+  let h = "";
+
+history.forEach(r=>{
+  h += `Rit ${r.stage}<br>`;
+});
+
+document.getElementById("history").innerHTML = h;
 }
 
 // 🚀 INIT
