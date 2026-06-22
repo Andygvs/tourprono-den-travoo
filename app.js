@@ -95,7 +95,7 @@ function loadStageInputs(){
 
 // 🔄 RENDER (BELANGRIJK)
 function render(){
-updatePodium();
+
   // deelnemerslijst
   let html = "";
 
@@ -123,6 +123,7 @@ updatePodium();
         p.appendChild(opt);
       }
     });
+    updatePodium();
   }
 
   // dropdown renners
