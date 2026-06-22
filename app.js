@@ -70,7 +70,16 @@ function assignRider(){
 
 // 📊 PUNTEN BEREKENEN
 function calculatePoints(){
+let riders = [];
 
+for(let i=0;i<10;i++){
+  riders.push(document.getElementById("m"+i).value);
+}
+
+if(hasDuplicates(riders)){
+  alert("❌ Geen dubbele renners in top 10!");
+  return;
+}
   for(let i=0;i<10;i++){
     let rider = document.getElementById("m"+i).value;
 
@@ -90,7 +99,9 @@ localStorage.setItem("history", JSON.stringify(history));
   render();
   closeStageModal();
 }
-
+function hasDuplicates(arr){
+  return new Set(arr).size !== arr.length;
+}
 // 🚴 INPUTS RIT
 function loadStageInputs(){
   let html = "";
