@@ -68,8 +68,9 @@ function assignRider(){
 
 // 📊 PUNTEN BEREKENEN
 function calculatePoints(){
+
   for(let i=0;i<10;i++){
-    let rider = document.getElementById("r"+i).value;
+    let rider = document.getElementById("m"+i).value;
 
     participants.forEach(p=>{
       if(p.rider === rider){
@@ -80,6 +81,7 @@ function calculatePoints(){
 
   save();
   render();
+  closeStageModal();
 }
 
 // 🚴 INPUTS RIT
@@ -181,4 +183,11 @@ function openStageModal(){
 
 function closeStageModal(){
   document.getElementById("stageModal").style.display = "none";
+}
+function resetStage(){
+  if(!confirm("Nieuwe rit starten?")) return;
+
+  document.querySelectorAll(".stageHistory")?.forEach(e => e.remove());
+
+  alert("Nieuwe rit gestart 🚴");
 }
