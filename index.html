@@ -30,6 +30,7 @@ button.delete {
 </style>
 
 </head>
+  <link rel="stylesheet" href="style.css">
 <body>
 
 <h1>🚴 TourProno Den Travoo</h1>
@@ -68,7 +69,8 @@ button.delete {
 <h2>🚴 Renner kiezen</h2>
 
 <select id="participantSelect"></select>
-<select id="riderSelect"></select>
+<input id="searchRider" placeholder="🔍 Zoek renner..." oninput="filterRiders()">
+<select id="riderSelect" size="6"></select>
 <button onclick="assignRider()">Toewijzen</button>
 
 <h2>🏆 Klassement</h2>
