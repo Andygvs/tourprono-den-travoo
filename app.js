@@ -95,7 +95,7 @@ function loadStageInputs(){
 
 // 🔄 RENDER (BELANGRIJK)
 function render(){
-
+updatePodium();
   // deelnemerslijst
   let html = "";
 
