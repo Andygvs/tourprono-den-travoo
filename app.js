@@ -155,6 +155,24 @@ function render(){
 // 🚀 INIT
 loadStageInputs();
 render();
+function updatePodium(){
+
+  let sorted = [...participants].sort((a,b)=>b.points-a.points);
+
+  let html = "";
+
+  if(sorted[0]){
+    html += `🥇 ${sorted[0].name} (${sorted[0].points})<br>`;
+  }
+  if(sorted[1]){
+    html += `🥈 ${sorted[1].name} (${sorted[1].points})<br>`;
+  }
+  if(sorted[2]){
+    html += `🥉 ${sorted[2].name} (${sorted[2].points})<br>`;
+  }
+
+  document.getElementById("podium").innerHTML = html;
+}
 function filterRiders(){
   let input = document.getElementById("searchRider").value.toLowerCase();
 
