@@ -2,261 +2,516 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>TourProno Den Travoo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚴 TourProno Den Travoo</title>
 
 <style>
-body { font-family: Arial; padding:20px; background:#fff; }
-h1 { color:#f5b301; }
-
-.card {
-  border:1px solid #ddd;
-  padding:10px;
-  margin:10px 0;
-  border-radius:8px;
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f5f5;
+    padding:20px;
+    max-width:1000px;
+    margin:auto;
 }
 
-input, select, button {
-  padding:6px;
-  margin:5px 0;
+h1{
+    color:#f5b301;
+    text-align:center;
 }
 
-button.delete {
-  background:red;
-  color:white;
-  border:none;
-  cursor:pointer;
-  margin-top:5px;
+.card{
+    background:white;
+    border-radius:10px;
+    padding:12px;
+    margin:10px 0;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+input,select,button{
+    padding:8px;
+    margin:5px 0;
+    border-radius:6px;
+}
+
+button{
+    cursor:pointer;
+}
+
+.delete{
+    background:red;
+    color:white;
+    border:none;
+}
+
+#podium{
+    font-size:20px;
+    background:#fff8dc;
+    padding:15px;
+    border-radius:10px;
+}
+
+#stageModal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    padding:20px;
+}
+
+.modal-content{
+    background:white;
+    max-width:500px;
+    margin:auto;
+    padding:20px;
+    border-radius:10px;
+}
+
+input[type=text], select{
+    width:100%;
+    box-sizing:border-box;
 }
 </style>
-
 </head>
-  <link rel="stylesheet" href="style.css">
+
 <body>
 
 <h1>🚴 TourProno Den Travoo</h1>
 
-<!-- 🟡 REGLEMENT -->
 <h2>📜 Reglement</h2>
+
 <div class="card">
 <ul>
-  <li>Elke deelnemer kiest <b>één renner</b> voor de volledige Tour.</li>
-  <li>Elke renner kan maar <b>één keer gekozen worden</b>.</li>
-  <li>Punten worden toegekend per rit:</li>
-  <ul>
-    <li>1e plaats = 25 punten</li>
-    <li>2e plaats = 20 punten</li>
-    <li>3e plaats = 16 punten</li>
-    <li>4e plaats = 13 punten</li>
-    <li>5e plaats = 11 punten</li>
-    <li>6e plaats = 10 punten</li>
-    <li>7e plaats = 9 punten</li>
-    <li>8e plaats = 8 punten</li>
-    <li>9e plaats = 7 punten</li>
-    <li>10e plaats = 6 punten</li>
-  </ul>
-  <li>Punten worden opgeteld over alle ritten.</li>
-  <li>Deelnemers kunnen enkel door de organisator worden beheerd.</li>
+<li>Iedere deelnemer kiest 1 renner voor de volledige Tour.</li>
+<li>Een renner kan maar één keer gekozen worden.</li>
+<li>Punten per rit:</li>
+<ul>
+<li>1e = 25</li>
+<li>2e = 20</li>
+<li>3e = 16</li>
+<li>4e = 14</li>
+<li>5e = 12</li>
+<li>6e = 10</li>
+<li>7e = 8</li>
+<li>8e = 6</li>
+<li>9e = 4</li>
+<li>10e = 2</li>
+</ul>
 </ul>
 </div>
+
 <button onclick="login()">🔐 Admin login</button>
+
 <h2>➕ Deelnemer toevoegen</h2>
-<input id="name" placeholder="Naam">
+
+<input id="name" placeholder="Naam deelnemer">
 <button onclick="addParticipant()">Toevoegen</button>
 
-<h2>👥 Deelnemers beheren</h2>
+<h2>👥 Deelnemers</h2>
 <div id="participants"></div>
 
 <h2>🚴 Renner kiezen</h2>
 
 <select id="participantSelect"></select>
-<input id="searchRider" 
-  placeholder="🔍 Zoek renner..." 
-  oninput="filterRiders()">
-<select id="riderSelect" size="6"></select>
-<button onclick="assignRider()">Toewijzen</button>
+
+<input
+id="searchRider"
+type="text"
+placeholder="🔍 Zoek renner..."
+oninput="filterRiders()">
+
+<select id="riderSelect" size="8"></select>
+
+<button onclick="assignRider()">Renner toewijzen</button>
+
+<h2>🏁 Rit uitslag</h2>
+
 <button onclick="openStageModal()">📥 Uitslag invoeren</button>
-<button onclick="resetStage()">🔄 Nieuwe rit</button>
-  <h2>🏆 Podium</h2>
+
+<h2>🏆 Podium</h2>
 <div id="podium"></div>
+
 <h2>🏆 Klassement</h2>
 <div id="ranking"></div>
+
 <h2>🗂 Ritgeschiedenis</h2>
 <div id="history"></div>
-<h2>🚴 Rit uitslag (top 10)</h2>
-<div id="stageInputs"></div>
-<button onclick="calculatePoints()">Bereken punten</button>
+
+<div id="stageModal">
+<div class="modal-content">
+
+<h3>🚴 Top 10 rit</h3>
+
+<div id="stageInputsModal"></div>
+
+<button onclick="calculatePoints()">
+✅ Punten berekenen
+</button>
+
+<button onclick="closeStageModal()">
+❌ Sluiten
+</button>
+
+</div>
+</div>
 
 <script>
+
 let isAdmin = false;
 
-function login(){
-  const pw = prompt("Admin wachtwoord:");
+const pointsTable = [25,20,16,14,12,10,8,6,4,2];
 
-  if(pw === "travoo123"){
-    isAdmin = true;
-    alert("Welkom admin 🚴");
-    render();
-  } else {
-    alert("Fout wachtwoord");
-  }
-}
-const pointsTable = [25,20,16,13,11,10,9,8,7,6];
+let participants =
+JSON.parse(localStorage.getItem("participants")) || [];
 
-// 🚴 TOUR RENNERS
+let history =
+JSON.parse(localStorage.getItem("history")) || [];
+
+/* VOORLOPIGE LIJST */
 let availableRiders = [
-  "Tadej Pogacar","Jonas Vingegaard","Remco Evenepoel","Wout van Aert",
-  "Jasper Philipsen","Mads Pedersen","Mathieu van der Poel","Primoz Roglic",
-  "Egan Bernal","Richard Carapaz","Joao Almeida","Sepp Kuss",
-  "Carlos Rodriguez","Adam Yates","Simon Yates","Julian Alaphilippe",
-  "Biniam Girmay","Kaden Groves","Arnaud De Lie","Michael Matthews",
-  "Dylan Groenewegen","Caleb Ewan","Jonathan Milan","Tim Merlier",
-  "Christophe Laporte","Stefan Küng","Victor Campenaerts","Matej Mohoric",
-  "Magnus Cort","Ben O'Connor","David Gaudu","Thibaut Pinot"
+"Tadej Pogacar",
+"Jonas Vingegaard",
+"Remco Evenepoel",
+"Wout van Aert",
+"Mathieu van der Poel",
+"Jasper Philipsen",
+"Tim Merlier",
+"Jonathan Milan",
+"Mads Pedersen",
+"Biniam Girmay",
+"Arnaud De Lie",
+"Kaden Groves",
+"Primoz Roglic",
+"Joao Almeida",
+"Adam Yates",
+"Simon Yates",
+"Sepp Kuss",
+"Carlos Rodriguez",
+"Richard Carapaz",
+"Egan Bernal",
+"Ben O'Connor",
+"Julian Alaphilippe",
+"David Gaudu",
+"Michael Matthews",
+"Matej Mohoric",
+"Victor Campenaerts",
+"Tim Wellens",
+"Nils Politt",
+"Brandon McNulty",
+"Stefan Küng",
+"Magnus Cort",
+"Caleb Ewan",
+"Dylan Groenewegen",
+"Christophe Laporte"
 ];
 
-// DATA
-let participants = JSON.parse(localStorage.getItem("participants")) || [];
-
 function save(){
-  localStorage.setItem("participants", JSON.stringify(participants));
+    localStorage.setItem(
+        "participants",
+        JSON.stringify(participants)
+    );
+
+    localStorage.setItem(
+        "history",
+        JSON.stringify(history)
+    );
 }
 
-// ➕ ADD
+function login(){
+
+    let pw = prompt("Admin wachtwoord");
+
+    if(pw === "travoo123"){
+        isAdmin = true;
+        alert("Welkom admin 🚴");
+        render();
+    }else{
+        alert("Verkeerd wachtwoord");
+    }
+}
+
 function addParticipant(){
-  let name = document.getElementById("name").value;
-  if(!name) return;
 
-  participants.push({
-    name,
-    rider: "",
-    points: 0
-  });
+    let name =
+    document.getElementById("name").value.trim();
 
-  document.getElementById("name").value = "";
-  save();
-  render();
+    if(!name) return;
+
+    participants.push({
+        name:name,
+        rider:"",
+        points:0
+    });
+
+    document.getElementById("name").value="";
+
+    save();
+    render();
 }
 
-// 🗑️ DELETE
 function deleteParticipant(index){
-  let p = participants[index];
 
-  if(p.rider){
-    availableRiders.push(p.rider);
-  }
+    if(!isAdmin) return;
 
-  participants.splice(index,1);
-  save();
-  render();
+    let p = participants[index];
+
+    if(p.rider){
+        availableRiders.push(p.rider);
+    }
+
+    participants.splice(index,1);
+
+    save();
+    render();
 }
 
-// 🚴 ASSIGN RIDER
 function assignRider(){
 
-  let pIndex = document.getElementById("participantSelect").value;
-  let rider = document.getElementById("riderSelect").value;
+    let participantIndex =
+    document.getElementById("participantSelect").value;
 
-  if(!participants[pIndex]) return;
+    let rider =
+    document.getElementById("riderSelect").value;
 
-  participants[pIndex].rider = rider;
-  availableRiders = availableRiders.filter(r => r !== rider);
+    if(!participants[participantIndex]) return;
+    if(!rider) return;
 
-  save();
-  render();
+    participants[participantIndex].rider = rider;
+
+    availableRiders =
+    availableRiders.filter(r=>r!==rider);
+
+    save();
+    render();
 }
 
-// ⭐ POINTS
+function filterRiders(){
+
+    let value =
+    document.getElementById("searchRider")
+    .value
+    .toLowerCase();
+
+    let select =
+    document.getElementById("riderSelect");
+
+    select.innerHTML="";
+
+    availableRiders
+    .filter(r =>
+        r.toLowerCase().includes(value)
+    )
+    .forEach(rider=>{
+
+        let option =
+        document.createElement("option");
+
+        option.value=rider;
+        option.textContent=rider;
+
+        select.appendChild(option);
+
+    });
+}
+
+function openStageModal(){
+
+    let html="";
+
+    for(let i=0;i<10;i++){
+
+        html += `
+        <input
+        type="text"
+        id="m${i}"
+        placeholder="${i+1}. plaats">
+        `;
+    }
+
+    document.getElementById(
+        "stageInputsModal"
+    ).innerHTML = html;
+
+    document.getElementById(
+        "stageModal"
+    ).style.display = "block";
+}
+
+function closeStageModal(){
+
+    document.getElementById(
+        "stageModal"
+    ).style.display = "none";
+}
+
 function calculatePoints(){
 
-  for(let i=0;i<10;i++){
-    let rider = document.getElementById("r"+i).value;
+    let riders=[];
 
-    participants.forEach(p=>{
-      if(p.rider === rider){
-        p.points += pointsTable[i];
-      }
+    for(let i=0;i<10;i++){
+
+        let rider =
+        document.getElementById("m"+i).value.trim();
+
+        if(rider){
+            riders.push(rider);
+        }
+    }
+
+    if(new Set(riders).size !== riders.length){
+
+        alert(
+            "❌ Geen dubbele renners in de top 10"
+        );
+
+        return;
+    }
+
+    for(let i=0;i<10;i++){
+
+        let rider =
+        document.getElementById("m"+i).value.trim();
+
+        participants.forEach(p=>{
+
+            if(p.rider === rider){
+
+                p.points += pointsTable[i];
+
+            }
+
+        });
+
+    }
+
+    history.push({
+        stage: history.length + 1,
+        date: new Date().toLocaleString()
     });
-  }
 
-  save();
-  render();
+    save();
+    render();
+    closeStageModal();
 }
 
-// 🚴 STAGE INPUTS
-function loadStageInputs(){
-  let html = "";
-  for(let i=0;i<10;i++){
-    html += `<input placeholder="${i+1}. renner" id="r${i}"><br>`;
-  }
-  document.getElementById("stageInputs").innerHTML = html;
+function updatePodium(){
+
+    let sorted =
+    [...participants]
+    .sort((a,b)=>b.points-a.points);
+
+    let html="";
+
+    if(sorted[0]){
+        html += `🥇 ${sorted[0].name} (${sorted[0].points} pt)<br>`;
+    }
+
+    if(sorted[1]){
+        html += `🥈 ${sorted[1].name} (${sorted[1].points} pt)<br>`;
+    }
+
+    if(sorted[2]){
+        html += `🥉 ${sorted[2].name} (${sorted[2].points} pt)<br>`;
+    }
+
+    document.getElementById("podium").innerHTML = html;
 }
 
-// 📊 RENDER
 function render(){
 
-  let html = "";
+    let html="";
 
-  participants.forEach((p,i)=>{
-    html += `<div class="card">
-      <b>${p.name}</b><br>
-      🚴 ${p.rider || "geen renner"}<br>
-      ⭐ ${p.points} pt<br>
-      ${isAdmin ? `<button class="delete" onclick="deleteParticipant(${i})">🗑️ Verwijder</button>` : ""}
-    </div>`;
-  });
+    participants.forEach((p,i)=>{
 
-  document.getElementById("participants").innerHTML = html;
+        html += `
+        <div class="card">
+            <b>${p.name}</b><br>
+            🚴 ${p.rider || "geen renner"}<br>
+            ⭐ ${p.points} punten<br>
 
-  let p = document.getElementById("participantSelect");
-  p.innerHTML = "";
-  participants.forEach((x,i)=>{
-    if(!x.rider){
-      let opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = x.name;
-      p.appendChild(opt);
-    }
-  });
+            ${
+            isAdmin
+            ?
+            `<button class="delete"
+            onclick="deleteParticipant(${i})">
+            🗑️ Verwijder
+            </button>`
+            :
+            ""
+            }
+        </div>
+        `;
+    });
 
-  let r = document.getElementById("riderSelect");
-  r.innerHTML = "";
-  availableRiders.forEach(rider=>{
-    let opt = document.createElement("option");
-    opt.value = rider;
-    opt.textContent = rider;
-    r.appendChild(opt);
-  });
+    document.getElementById(
+        "participants"
+    ).innerHTML = html;
 
-  let sorted = [...participants].sort((a,b)=>b.points-a.points);
+    let participantSelect =
+    document.getElementById(
+        "participantSelect"
+    );
 
-  let rank = "";
-  sorted.forEach((p,i)=>{
-    rank += `<div class="card">#${i+1} ${p.name} - ${p.points} pt</div>`;
-  });
+    participantSelect.innerHTML="";
 
-  document.getElementById("ranking").innerHTML = rank;
+    participants.forEach((p,i)=>{
+
+        if(!p.rider){
+
+            let option =
+            document.createElement("option");
+
+            option.value=i;
+            option.textContent=p.name;
+
+            participantSelect.appendChild(option);
+
+        }
+
+    });
+
+    filterRiders();
+
+    let sorted =
+    [...participants]
+    .sort((a,b)=>b.points-a.points);
+
+    let ranking="";
+
+    sorted.forEach((p,i)=>{
+
+        ranking += `
+        <div class="card">
+        #${i+1} - ${p.name}
+        (${p.points} pt)
+        </div>`;
+    });
+
+    document.getElementById(
+        "ranking"
+    ).innerHTML = ranking;
+
+    let hist="";
+
+    history.forEach(h=>{
+
+        hist += `
+        <div class="card">
+        Rit ${h.stage}<br>
+        ${h.date}
+        </div>
+        `;
+    });
+
+    document.getElementById(
+        "history"
+    ).innerHTML = hist;
+
+    updatePodium();
 }
 
-// INIT
-loadStageInputs();
 render();
 
 </script>
-<script src="riders.js"></script>
-<script src="app.js"></script>
+
 </body>
-  <div id="stageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-background:rgba(0,0,0,0.7); padding:20px;">
-
-  <div style="background:white; padding:20px; max-width:400px; margin:auto; border-radius:10px;">
-
-    <h3>🚴 Top 10 invoeren</h3>
-
-    <div id="stageInputsModal"></div>
-
-    <button onclick="calculatePoints()">✅ Opslaan & bereken</button>
-    <button onclick="closeStageModal()">❌ Sluiten</button>
-
-  </div>
-</div>
 </html>
