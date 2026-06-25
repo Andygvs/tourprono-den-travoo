@@ -1,5 +1,4 @@
-const availableRiders = [
-
+const riders = [
   // 🇧🇪 Belgen
   "Remco Evenepoel",
   "Wout van Aert",
