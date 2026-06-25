@@ -78,36 +78,21 @@ input[type=text], select{
 <h1>🚴 TourProno Den Travoo</h1>
 
 <h2>📜 Reglement</h2>
-
 <div class="card">
 <ul>
 <li>Iedere deelnemer kiest 1 renner voor de volledige Tour.</li>
 <li>Een renner kan maar één keer gekozen worden.</li>
-<li>Punten per rit:</li>
-<ul>
-<li>1e = 25</li>
-<li>2e = 20</li>
-<li>3e = 16</li>
-<li>4e = 14</li>
-<li>5e = 12</li>
-<li>6e = 10</li>
-<li>7e = 8</li>
-<li>8e = 6</li>
-<li>9e = 4</li>
-<li>10e = 2</li>
-</ul>
+<li>Punten per rit: 25 - 20 - 16 - 14 - 12 - 10 - 8 - 6 - 4 - 2</li>
 </ul>
 </div>
 
 <button onclick="login()">🔐 Admin login</button>
 
-<h2>➕ Deelnemer toevoegen</h2>
+<div id="adminPanel" style="display:none;">
 
+<h2>➕ Deelnemer toevoegen</h2>
 <input id="name" placeholder="Naam deelnemer">
 <button onclick="addParticipant()">Toevoegen</button>
-
-<h2>👥 Deelnemers</h2>
-<div id="participants"></div>
 
 <h2>🚴 Renner kiezen</h2>
 
@@ -123,8 +108,12 @@ oninput="filterRiders()">
 
 <button onclick="assignRider()">Renner toewijzen</button>
 
-<h2>🏁 Rit uitslag</h2>
+</div>
 
+<h2>👥 Deelnemers</h2>
+<div id="participants"></div>
+
+<h2>🏁 Rit uitslag</h2>
 <button onclick="openStageModal()">📥 Uitslag invoeren</button>
 
 <h2>🏆 Podium</h2>
@@ -143,16 +132,14 @@ oninput="filterRiders()">
 
 <div id="stageInputsModal"></div>
 
-<button onclick="calculatePoints()">
-✅ Punten berekenen
-</button>
-
-<button onclick="closeStageModal()">
-❌ Sluiten
-</button>
+<button onclick="calculatePoints()">✅ Punten berekenen</button>
+<button onclick="closeStageModal()">❌ Sluiten</button>
 
 </div>
 </div>
+
+<!-- BELANGRIJK: riders.js eerst laden -->
+<script src="riders.js"></script>
 
 <script>
 
@@ -166,54 +153,12 @@ JSON.parse(localStorage.getItem("participants")) || [];
 let history =
 JSON.parse(localStorage.getItem("history")) || [];
 
-/* VOORLOPIGE LIJST */
-let availableRiders = [
-"Tadej Pogacar",
-"Jonas Vingegaard",
-"Remco Evenepoel",
-"Wout van Aert",
-"Mathieu van der Poel",
-"Jasper Philipsen",
-"Tim Merlier",
-"Jonathan Milan",
-"Mads Pedersen",
-"Biniam Girmay",
-"Arnaud De Lie",
-"Kaden Groves",
-"Primoz Roglic",
-"Joao Almeida",
-"Adam Yates",
-"Simon Yates",
-"Sepp Kuss",
-"Carlos Rodriguez",
-"Richard Carapaz",
-"Egan Bernal",
-"Ben O'Connor",
-"Julian Alaphilippe",
-"David Gaudu",
-"Michael Matthews",
-"Matej Mohoric",
-"Victor Campenaerts",
-"Tim Wellens",
-"Nils Politt",
-"Brandon McNulty",
-"Stefan Küng",
-"Magnus Cort",
-"Caleb Ewan",
-"Dylan Groenewegen",
-"Christophe Laporte"
-];
+let availableRiders = [...riders]; 
+// 👆 komt nu uit riders.js
 
 function save(){
-    localStorage.setItem(
-        "participants",
-        JSON.stringify(participants)
-    );
-
-    localStorage.setItem(
-        "history",
-        JSON.stringify(history)
-    );
+    localStorage.setItem("participants", JSON.stringify(participants));
+    localStorage.setItem("history", JSON.stringify(history));
 }
 
 function login(){
@@ -222,28 +167,26 @@ function login(){
 
     if(pw === "travoo123"){
         isAdmin = true;
+        document.getElementById("adminPanel").style.display = "block";
         alert("Welkom admin 🚴");
         render();
-    }else{
+    } else {
         alert("Verkeerd wachtwoord");
     }
 }
 
 function addParticipant(){
 
-    let name =
-    document.getElementById("name").value.trim();
-
+    let name = document.getElementById("name").value.trim();
     if(!name) return;
 
     participants.push({
-        name:name,
+        name,
         rider:"",
         points:0
     });
 
     document.getElementById("name").value="";
-
     save();
     render();
 }
@@ -259,26 +202,19 @@ function deleteParticipant(index){
     }
 
     participants.splice(index,1);
-
     save();
     render();
 }
 
 function assignRider(){
 
-    let participantIndex =
-    document.getElementById("participantSelect").value;
+    let i = document.getElementById("participantSelect").value;
+    let rider = document.getElementById("riderSelect").value;
 
-    let rider =
-    document.getElementById("riderSelect").value;
+    if(!participants[i] || !rider) return;
 
-    if(!participants[participantIndex]) return;
-    if(!rider) return;
-
-    participants[participantIndex].rider = rider;
-
-    availableRiders =
-    availableRiders.filter(r=>r!==rider);
+    participants[i].rider = rider;
+    availableRiders = availableRiders.filter(r => r !== rider);
 
     save();
     render();
@@ -286,28 +222,18 @@ function assignRider(){
 
 function filterRiders(){
 
-    let value =
-    document.getElementById("searchRider")
-    .value
-    .toLowerCase();
+    let value = document.getElementById("searchRider").value.toLowerCase();
+    let select = document.getElementById("riderSelect");
 
-    let select =
-    document.getElementById("riderSelect");
-
-    select.innerHTML="";
+    select.innerHTML = "";
 
     availableRiders
-    .filter(r =>
-        r.toLowerCase().includes(value)
-    )
-    .forEach(rider=>{
+    .filter(r => r.toLowerCase().includes(value))
+    .forEach(rider => {
 
-        let option =
-        document.createElement("option");
-
-        option.value=rider;
-        option.textContent=rider;
-
+        let option = document.createElement("option");
+        option.value = rider;
+        option.textContent = rider;
         select.appendChild(option);
 
     });
@@ -315,70 +241,30 @@ function filterRiders(){
 
 function openStageModal(){
 
-    let html="";
+    let html = "";
 
     for(let i=0;i<10;i++){
-
-        html += `
-        <input
-        type="text"
-        id="m${i}"
-        placeholder="${i+1}. plaats">
-        `;
+        html += `<input type="text" id="m${i}" placeholder="${i+1}. plaats">`;
     }
 
-    document.getElementById(
-        "stageInputsModal"
-    ).innerHTML = html;
-
-    document.getElementById(
-        "stageModal"
-    ).style.display = "block";
+    document.getElementById("stageInputsModal").innerHTML = html;
+    document.getElementById("stageModal").style.display = "block";
 }
 
 function closeStageModal(){
-
-    document.getElementById(
-        "stageModal"
-    ).style.display = "none";
+    document.getElementById("stageModal").style.display = "none";
 }
 
 function calculatePoints(){
 
-    let riders=[];
-
     for(let i=0;i<10;i++){
 
-        let rider =
-        document.getElementById("m"+i).value.trim();
-
-        if(rider){
-            riders.push(rider);
-        }
-    }
-
-    if(new Set(riders).size !== riders.length){
-
-        alert(
-            "❌ Geen dubbele renners in de top 10"
-        );
-
-        return;
-    }
-
-    for(let i=0;i<10;i++){
-
-        let rider =
-        document.getElementById("m"+i).value.trim();
+        let rider = document.getElementById("m"+i).value.trim();
 
         participants.forEach(p=>{
-
             if(p.rider === rider){
-
                 p.points += pointsTable[i];
-
             }
-
         });
 
     }
@@ -395,30 +281,20 @@ function calculatePoints(){
 
 function updatePodium(){
 
-    let sorted =
-    [...participants]
-    .sort((a,b)=>b.points-a.points);
+    let sorted = [...participants].sort((a,b)=>b.points-a.points);
 
-    let html="";
+    let html = "";
 
-    if(sorted[0]){
-        html += `🥇 ${sorted[0].name} (${sorted[0].points} pt)<br>`;
-    }
-
-    if(sorted[1]){
-        html += `🥈 ${sorted[1].name} (${sorted[1].points} pt)<br>`;
-    }
-
-    if(sorted[2]){
-        html += `🥉 ${sorted[2].name} (${sorted[2].points} pt)<br>`;
-    }
+    if(sorted[0]) html += `🥇 ${sorted[0].name} (${sorted[0].points})<br>`;
+    if(sorted[1]) html += `🥈 ${sorted[1].name} (${sorted[1].points})<br>`;
+    if(sorted[2]) html += `🥉 ${sorted[2].name} (${sorted[2].points})<br>`;
 
     document.getElementById("podium").innerHTML = html;
 }
 
 function render(){
 
-    let html="";
+    let html = "";
 
     participants.forEach((p,i)=>{
 
@@ -427,84 +303,37 @@ function render(){
             <b>${p.name}</b><br>
             🚴 ${p.rider || "geen renner"}<br>
             ⭐ ${p.points} punten<br>
-
-            ${
-            isAdmin
-            ?
-            `<button class="delete"
-            onclick="deleteParticipant(${i})">
-            🗑️ Verwijder
-            </button>`
-            :
-            ""
-            }
-        </div>
-        `;
+            ${isAdmin ? `<button class="delete" onclick="deleteParticipant(${i})">🗑️ Verwijder</button>` : ""}
+        </div>`;
     });
 
-    document.getElementById(
-        "participants"
-    ).innerHTML = html;
+    document.getElementById("participants").innerHTML = html;
 
-    let participantSelect =
-    document.getElementById(
-        "participantSelect"
-    );
-
-    participantSelect.innerHTML="";
+    let sel = document.getElementById("participantSelect");
+    sel.innerHTML = "";
 
     participants.forEach((p,i)=>{
-
         if(!p.rider){
-
-            let option =
-            document.createElement("option");
-
-            option.value=i;
-            option.textContent=p.name;
-
-            participantSelect.appendChild(option);
-
+            let opt = document.createElement("option");
+            opt.value = i;
+            opt.textContent = p.name;
+            sel.appendChild(opt);
         }
-
     });
 
     filterRiders();
 
-    let sorted =
-    [...participants]
-    .sort((a,b)=>b.points-a.points);
+    let sorted = [...participants].sort((a,b)=>b.points-a.points);
 
-    let ranking="";
+    document.getElementById("ranking").innerHTML =
+    sorted.map((p,i)=>`
+        <div class="card">#${i+1} ${p.name} (${p.points})</div>
+    `).join("");
 
-    sorted.forEach((p,i)=>{
-
-        ranking += `
-        <div class="card">
-        #${i+1} - ${p.name}
-        (${p.points} pt)
-        </div>`;
-    });
-
-    document.getElementById(
-        "ranking"
-    ).innerHTML = ranking;
-
-    let hist="";
-
-    history.forEach(h=>{
-
-        hist += `
-        <div class="card">
-        Rit ${h.stage}<br>
-        ${h.date}
-        </div>
-        `;
-    });
-
-    document.getElementById(
-        "history"
-    ).innerHTML = hist;
+    document.getElementById("history").innerHTML =
+    history.map(h=>`
+        <div class="card">Rit ${h.stage} - ${h.date}</div>
+    `).join("");
 
     updatePodium();
 }
